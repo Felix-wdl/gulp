@@ -1,6 +1,5 @@
 //引入插件
 var gulp = require('gulp'),
-  minify = require('gulp-minify'),
   htmlmin = require('gulp-htmlmin'),
   cleanCSS = require('gulp-clean-css'),
   base64 = require('gulp-base64'),
