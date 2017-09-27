@@ -1,9 +1,10 @@
-## gulp 基本运用
-#### 基于gulp压缩图片、转换小图片为base64并压缩css、压缩js、压缩html等完成项目打包工作。
+# gulp 基本运用
+#### gulp-less + gulp-livereload + http-server + Chrome 实现本地热更新。
+#### 压缩图片、转换小图片为base64并压缩css、压缩js、压缩html打包项目。
 
 ##### [gulp 中文网地址 http://www.gulpjs.com.cn/](http://www.gulpjs.com.cn/)
 
-### 详情步骤
+## 基本步骤
 1、全局安装 gulp
 ```js
 npm install --global gulp
@@ -19,7 +20,66 @@ gulp.task('default', function() {
   // 将你的默认的任务代码放在这
 });
 ```
-4、压缩图片 (gulp-imagemin)
+
+## 本地运行
+1、安装Chrome IiveReload 运行环境 [下载地址](https://chrome.google.com/webstore/detail/livereload/jnihajbhpnppcggbcgedagnkighmdlei)
+
+2、安装完成后，在浏览器右上角会出现 ![](./src/images/mk.png) , 点击图标启动改插件(中间空心点会变为实心点)
+
+3、在项目目录启动本地服务(http-server)，并通过启动地址+端口进行访问，详情：[https://www.npmjs.com/package/http-server](https://www.npmjs.com/package/http-server)
+
+4、安装less插件
+
+详情 [https://www.npmjs.com/package/gulp-less](https://www.npmjs.com/package/gulp-less)
+```js
+npm install gulp-less --save-dev
+```
+```js
+//本地less -> css热更新
+gulp.task('changeLess', function () {
+  return gulp.src(path.devOutput.less)
+    .pipe(less({
+      paths: [pathUrl.join(__dirname, 'less', 'includes')]
+    }))
+    .pipe(gulp.dest(path.devOutput.css))
+    .pipe(livereload());
+});
+```
+5、添加html,js 更改的监听
+```js
+//本地html热更新监听
+gulp.task('changeHtml', function () {
+  gulp.src(path.input.html)
+    .pipe(gulp.dest(path.devOutput.html))
+    .pipe(livereload());
+});
+//本地js热更新监听
+gulp.task('changeJS', function () {
+  gulp.src(path.input.js)
+    .pipe(gulp.dest(path.devOutput.js))
+    .pipe(livereload());
+});
+```
+6、添加热更新命令和本地运行命令
+```js
+//热更新
+gulp.task('hot', function () {
+  livereload.listen();
+  gulp.watch(path.root, ['changeLess', 'changeHtml', 'changeJS']);
+});
+//本地运行
+gulp.task('dev', ['hot'], function () {
+  console.log('dev...');
+});
+```
+7、运行本地运行命令即可
+```js
+gulp dev
+```
+
+
+## 打包项目
+1、压缩图片 (gulp-imagemin)
 
 详情 [https://www.npmjs.com/package/gulp-imagemin](https://www.npmjs.com/package/gulp-imagemin)
 
@@ -37,14 +97,14 @@ gulp.task('minImages', function () {
 ```
 
 
-5、转换小图片为 base64 并压缩css
+2、转换小图片为 base64 并压缩css
 
 base64详情 [https://www.npmjs.com/package/gulp-base64](https://www.npmjs.com/package/gulp-base64)
 
 压缩css详情 [https://www.npmjs.com/package/gulp-clean-css](https://www.npmjs.com/package/gulp-clean-css)
 ```js
-npm install gulp-base64--save-dev
-npm install gulp-clean-css--save-dev
+npm install gulp-base64 --save-dev
+npm install gulp-clean-css --save-dev
 ```
 ```js
 //图片转base64+压缩css
@@ -57,7 +117,7 @@ gulp.task('minCss', function () {
 });
 ```
 
-6、压缩js
+3、压缩js
 
 详情 [https://www.npmjs.com/package/gulp-uglify](https://www.npmjs.com/package/gulp-uglify)
 
@@ -73,30 +133,20 @@ gulp.task('formatJS', function () {
   console.log('build js');
 });
 ```
-7、压缩html
+4、压缩html
 
 详情 [https://www.npmjs.com/package/gulp-htmlmin/](https://www.npmjs.com/package/gulp-htmlmin)
 
 ```js
 //压缩Html
 gulp.task('formatHtml', function () {
-  var options = {
-    removeComments: true,//清除HTML注释
-    collapseWhitespace: true,//压缩HTML
-    removeEmptyAttributes: true,//删除所有空格作属性值 <input id="" /> ==> <input />
-    removeScriptTypeAttributes: true,//删除<script>的type="text/javascript"
-    removeStyleLinkTypeAttributes: true,//删除<style>和<link>的type="text/css"
-    minifyJS: true,//压缩页面JS
-    minifyCSS: true//压缩页面CSS
-  };
-  gulp.src(path.input.html)
-    .pipe(htmlmin(options))
-    .pipe(gulp.dest(path.output.html));
-  console.log('build html');
+  return gulp.src(path.input.html)
+    .pipe(htmlmin({collapseWhitespace: true}))
+    .pipe(gulp.dest(path.buildOutput.html));
 });
 ```
 
-8、运行上面所有任务
+5、整合上面所有任务, 运行打包命令
 ```javascript
 //打包命令
 gulp.task('build', ['minImages', 'minCss', 'formatJS', 'copyOther', 'formatHtml'], function () {
@@ -104,96 +154,7 @@ gulp.task('build', ['minImages', 'minCss', 'formatJS', 'copyOther', 'formatHtml'
 });
 
 ```
-9、在命令行运行打包命令即可生成 `dist` 文件夹
+6、生成的'dist` 文件夹即为打包文件
 ```js
 gulp build
-```
-#### 附上 `gulpfile.js`
-
-```js
-//引入插件
-var gulp = require('gulp'),
-  minify = require('gulp-minify'),
-  htmlmin = require('gulp-htmlmin'),
-  cleanCSS = require('gulp-clean-css'),
-  base64 = require('gulp-base64'),
-  uglify = require('gulp-uglify'),
-  imagemin = require('gulp-imagemin');
-//声明打包位置
-var path = {
-  input: { //入口
-    html: ['./src/*.html'],
-    images: ['./src/images/*'],
-    css: ['./src/css/*.css'],
-    js: ['./src/js/*.js'],
-    plugins: ['./src/plugins/*']
-  },
-  output: { //出口
-    html: 'dist',
-    images: 'dist/images',
-    css: 'dist/css',
-    js: 'dist/js',
-    plugins: 'dist/plugins'
-  }
-};
-
-//压缩图片
-gulp.task('minImages', function () {
-  gulp.src(path.input.images)
-    .pipe(imagemin())
-    .pipe(gulp.dest(path.output.images));
-  console.log('build images');
-});
-//图片转base64+压缩css
-gulp.task('minCss', function () {
-  gulp.src(path.input.css)
-    .pipe(base64())
-    .pipe(cleanCSS({compatibility: 'ie8'}))
-    .pipe(gulp.dest(path.output.css));
-  console.log('build css');
-});
-
-//压缩js
-gulp.task('formatJS', function () {
-  gulp.src(path.input.js)
-    .pipe(uglify())
-    .pipe(gulp.dest(path.output.js));
-  console.log('build js');
-});
-
-//copy第三方js
-gulp.task('copyOther', function () {
-  gulp.src(path.input.plugins)
-    .pipe(gulp.dest(path.output.plugins));
-  console.log('copy other');
-});
-//压缩Html
-gulp.task('formatHtml', function () {
-  gulp.src(path.input.html)
-    .pipe(htmlmin({collapseWhitespace: true}))
-    .pipe(gulp.dest(path.output.html));
-  console.log('build html');
-});
-//打包命令
-gulp.task('build', ['minImages', 'minCss', 'formatJS', 'copyOther', 'formatHtml'], function () {
-  console.log('build...');
-});
-
-```
-
-#### `package.json`
-
-```js
-{
-  "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-babel": "^7.0.0",
-    "gulp-base64": "^0.1.3",
-    "gulp-clean-css": "^3.9.0",
-    "gulp-htmlmin": "^3.0.0",
-    "gulp-imagemin": "^3.3.0",
-    "gulp-minify": "^1.0.0",
-    "gulp-uglify": "^3.0.0"
-  }
-}
 ```
