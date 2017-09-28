@@ -89,7 +89,7 @@ npm install gulp-imagemin --save-dev
 ```js
 //压缩图片
 gulp.task('minImages', function () {
-	return  gulp.src(path.input.images)
+  return gulp.src(path.input.images)
     .pipe(imagemin())
     .pipe(gulp.dest(path.output.images));
   console.log('build images');
@@ -109,7 +109,7 @@ npm install gulp-clean-css --save-dev
 ```js
 //图片转base64+压缩css
 gulp.task('minCss', function () {
-	 return gulp.src(path.input.css)
+  return gulp.src(path.input.css)
     .pipe(base64())
     .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(gulp.dest(path.output.css));
@@ -127,7 +127,7 @@ npm install gulp-uglify --save-dev
 ```js
 //压缩js
 gulp.task('formatJS', function () {
-	return  gulp.src(path.input.js)
+  return gulp.src(path.input.js)
     .pipe(uglify())
     .pipe(gulp.dest(path.output.js));
   console.log('build js');
