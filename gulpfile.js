@@ -5,6 +5,7 @@ var gulp = require('gulp'),
   less = require('gulp-less'),
   cleanCSS = require('gulp-clean-css'),
   uglify = require('gulp-uglify'),
+  concat = require('gulp-concat'),
   htmlmin = require('gulp-htmlmin'),
   livereload = require('gulp-livereload'),
   pathUrl = require('path');
@@ -86,9 +87,10 @@ gulp.task('formatJS', function () {
     .pipe(uglify())
     .pipe(gulp.dest(path.buildOutput.js));
 });
-//copy第三方js
+//合并第三方JS, 减少请求
 gulp.task('copyOther', function () {
   return gulp.src(path.input.plugins)
+    .pipe(concat('common.js'))
     .pipe(gulp.dest(path.buildOutput.plugins));
 });
 //压缩Html

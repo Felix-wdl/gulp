@@ -89,7 +89,7 @@ npm install gulp-imagemin --save-dev
 ```js
 //压缩图片
 gulp.task('minImages', function () {
-  gulp.src(path.input.images)
+	return  gulp.src(path.input.images)
     .pipe(imagemin())
     .pipe(gulp.dest(path.output.images));
   console.log('build images');
@@ -109,7 +109,7 @@ npm install gulp-clean-css --save-dev
 ```js
 //图片转base64+压缩css
 gulp.task('minCss', function () {
-  gulp.src(path.input.css)
+	 return gulp.src(path.input.css)
     .pipe(base64())
     .pipe(cleanCSS({compatibility: 'ie8'}))
     .pipe(gulp.dest(path.output.css));
@@ -127,13 +127,28 @@ npm install gulp-uglify --save-dev
 ```js
 //压缩js
 gulp.task('formatJS', function () {
-  gulp.src(path.input.js)
+	return  gulp.src(path.input.js)
     .pipe(uglify())
     .pipe(gulp.dest(path.output.js));
   console.log('build js');
 });
 ```
-4、压缩html
+4、合并第三方JS, 减少请求
+
+详情 [https://www.npmjs.com/package/gulp-concat](https://www.npmjs.com/package/gulp-concat)
+```js
+npm install gulp-concat --save-dev
+```
+```js
+//合并第三方JS, 减少请求
+gulp.task('copyOther', function () {
+  return gulp.src(path.input.plugins)
+    .pipe(concat('common.js'))
+    .pipe(gulp.dest(path.buildOutput.plugins));
+});
+```
+
+5、压缩html
 
 详情 [https://www.npmjs.com/package/gulp-htmlmin/](https://www.npmjs.com/package/gulp-htmlmin)
 
@@ -146,7 +161,7 @@ gulp.task('formatHtml', function () {
 });
 ```
 
-5、整合上面所有任务, 运行打包命令
+6、整合上面所有任务, 运行打包命令
 ```javascript
 //打包命令
 gulp.task('build', ['minImages', 'minCss', 'formatJS', 'copyOther', 'formatHtml'], function () {
@@ -154,7 +169,7 @@ gulp.task('build', ['minImages', 'minCss', 'formatJS', 'copyOther', 'formatHtml'
 });
 
 ```
-6、生成的'dist` 文件夹即为打包文件
+7、生成的`dist` 文件夹即为打包文件
 ```js
 gulp build
 ```
